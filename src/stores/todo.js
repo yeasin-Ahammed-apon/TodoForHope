@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { onMounted, ref } from "vue";
+import { toast } from "vue3-toastify";
 
 export const useTodoStore = defineStore("todo", () => {
   const isShowingList = ref(true);
@@ -9,20 +10,42 @@ export const useTodoStore = defineStore("todo", () => {
   const task_id = ref(null);
   const datas = ref([]);
   onMounted(() => {
-    datas.value =JSON.parse(localStorage.getItem("tasks"))||[];
+    datas.value = JSON.parse(localStorage.getItem("tasks")) || [];
   });
+
   const addTask = (title, des) => {
+    if (!title || !des || title.length === 0 || des.length === 0) {
+      toast.warning(
+        "Title and description cannot be empty. Please provide values.",
+        {
+          autoClose: 2000,
+        }
+      );
+      return;
+    }
     const val = {
       id: Date.now(),
       title: title,
       des: des,
       status: false,
     };
-    datas.value.push(val)
+    datas.value.push(val);
     localStorage.setItem("tasks", JSON.stringify(datas.value));
     isShowingList.value = true;
+    toast.success("Task Added Successfully", {
+      autoClose: 2000,
+    });
   };
   const updateTask = (title, des, status) => {
+    if (!title || !des || title.length === 0 || des.length === 0) {
+      toast.warning(
+        "Title and description cannot be empty. Please provide values.",
+        {
+          autoClose: 2000,
+        }
+      );
+      return;
+    }
     const index = datas.value.findIndex(
       (task) => task.id === parseInt(task_id.value)
     );
@@ -34,6 +57,9 @@ export const useTodoStore = defineStore("todo", () => {
         status,
       });
       localStorage.setItem("tasks", JSON.stringify(datas.value));
+      toast.success("Task Updated Successfully", {
+        autoClose: 2000,
+      });
     }
   };
   const deletTask = () => {
@@ -42,6 +68,10 @@ export const useTodoStore = defineStore("todo", () => {
     );
     localStorage.setItem("tasks", JSON.stringify(datas.value));
     isShowingList.value = true;
+    task_id.value = null;
+    toast.success("Task Deleted Successfully", {
+      autoClose: 2000,
+    });
   };
   return {
     addTask,
